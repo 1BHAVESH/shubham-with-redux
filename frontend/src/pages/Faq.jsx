@@ -17,7 +17,7 @@ const Faq = () => {
 
       <div className="max-w-[1370px] mx-auto px-4 py-5">
         <div className="flex items-center gap-1 mb-10 ml-5 max-w-[100px]">
-          <div className="bg-[#D2AB48] h-2 w-7"></div>
+          <div className="bg-[#D2AB48] h-1 w-7"></div>
           <p className="font-bold text-[20px]">FAQs</p>
         </div>
 

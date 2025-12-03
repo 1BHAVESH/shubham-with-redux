@@ -63,20 +63,20 @@ const Careers = () => {
   return (
     <div>
 
-      {/* 🔶 PAGE HERO SECTION */}
+      {/*  PAGE HERO SECTION */}
       <section>
         <CommomImg page="Careers" />
       </section>
 
-      {/* 🔶 MAIN CONTENT */}
+      {/*  MAIN CONTENT */}
       <section className="max-w-[1370px] mx-auto px-4 md:px-8 py-12">
 
         <div className="flex items-center gap-1">
-        <div className="bg-[#D2AB48] h-2 w-7"></div>
+        <div className="bg-[#D2AB48] h-1 w-7"></div>
         <p className="font-bold text-[20px]">Careers</p>
         </div>
 
-        {/* 🔸 HEADING  */}
+        {/*  HEADING  */}
         <h2 className="text-[20px] md:text-[24px] font-normal mb-3">
           Build Your Future With Us
         </h2>
@@ -89,7 +89,7 @@ const Careers = () => {
           exciting industry filled with opportunities, you’ve come to the right place.
         </p>
 
-        {/* 🔸 CURRENT OPENINGS */}
+        {/*  CURRENT OPENINGS */}
         <h3 className="text-[24px] font-medium mb-6">Current Openings</h3>
 
         {/* GRID OF JOBS */}

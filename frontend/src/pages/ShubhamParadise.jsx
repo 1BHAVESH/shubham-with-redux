@@ -102,7 +102,7 @@ const ShubhamParadise = () => {
         <video
           autoPlay
           loop
-          muted
+          
           playsInline
           className="w-full h-full object-cover"
         >
@@ -362,11 +362,11 @@ const ShubhamParadise = () => {
 
           <Dialog>
             <DialogTrigger asChild>
-              <button className="mt-6 cursor-pointer bg-[#D2AB48] px-4 py-2 text-black w-[140px] rounded-md font-semibold hover:bg-[#b89434] transition">
+              <button className="mt-6 cursor-pointer  bg-[#D2AB48] px-4 py-2 text-black w-[140px] rounded-md font-semibold hover:bg-[#b89434] transition">
                 Enquiry
               </button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="[&>button]:cursor-pointer">
               <EnquiryDialog />
             </DialogContent>
           </Dialog>

@@ -3,6 +3,7 @@ import MediaCard from "@/components/MediaCard";
 import carimg from "../assets/Screenshot_3.png";
 import CommomImg from "@/components/CommonBackgroundImg";
 import subhamDeveloper from "../assets/image 28.png";
+import calender from "../assets/Calendar.png";
 
 const Media = () => {
   const mediaData = [
@@ -77,51 +78,59 @@ const Media = () => {
       {/* ARTICLE + SIDEBAR */}
       <section className="max-w-6xl mx-auto px-4 mb-5">
         <div className="grid lg:grid-cols-3 gap-10">
-          
           {/* LEFT ARTICLE USING MAP */}
           <div className="lg:col-span-2">
-            
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-2">
+                <img src={calender} className="w-4 h-4 object-contain" />
+                <span className="text-sm text-gray-700">
+                  {"Dec 17, 2025"}
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-700">your name...</p>
+            </div>
 
             {/* Article Mapping */}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
             {articleData.map((item) => (
               <div key={item.id}>
-                <h2 className="text-2xl font-semibold mb-4">{item.title}</h2>
+                <h2 className="text-2xl font-semibold mb-4 mt-5">{item.title}</h2>
                 <p className="text-gray-700 leading-relaxed">{item.content}</p>
               </div>
             ))}
@@ -129,14 +138,13 @@ const Media = () => {
 
           {/* RIGHT SIDEBAR - LATEST POSTS */}
           <div className="bg-white shadow-lg rounded-xl p-6 h-fit">
-            <h3 className="text-[16px] font-medium mb-4">Latest Posts</h3>
+            <h3 className="text-[16px] font-medium mb-4 mt-5">Latest Posts</h3>
             <div className="flex flex-col gap-4">
               {mediaData.map((item) => (
                 <LatestCard key={item.id} item={item} />
               ))}
             </div>
           </div>
-
         </div>
       </section>
     </>
@@ -224,7 +232,7 @@ import person4 from "../assets/men-with-building.png";
               Sanklecha
             </h3>
           </div>
-          <p className="text-[9px] sm:text-[8px] lg:text-[9px] leading-relaxed text-gray-700 flex-1">
+          <p className="text-[110px] sm:text-[8px] lg:text-[9px] leading-relaxed text-gray-700 flex-1">
             With 25 years of experience in the Property Business along with
             30 years in the building industry, Mr. Sheshmal Sanklecha is the
             force behind The Fort. It's his dream project that will elevate

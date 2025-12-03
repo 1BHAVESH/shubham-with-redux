@@ -17,7 +17,7 @@ export const mailSend = async (req, res) => {
   try {
     let htmlTemplate = "";
 
-    // ⭐ CASE 1: Project Selected (projectType exists)
+    //  CASE 1: Project Selected (projectType exists)
     if (projectType) {
       htmlTemplate = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background:#f7f7f7;">
@@ -44,7 +44,7 @@ export const mailSend = async (req, res) => {
       </div>`;
     }
 
-    // ⭐ CASE 2: No project (Normal Enquiry)
+    //  CASE 2: No project (Normal Enquiry)
     else {
       htmlTemplate = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background:#f7f7f7;">
@@ -69,7 +69,7 @@ export const mailSend = async (req, res) => {
       </div>`;
     }
 
-    // ⭐ Send Email
+    //  Send Email
     await transporter.sendMail({
       from: `"${name}" <${email}>`,
       to: "1bhaveshjaswani1@gmail.com",
