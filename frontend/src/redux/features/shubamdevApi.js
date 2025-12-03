@@ -6,6 +6,7 @@ export const shubhamDevApi = createApi({
     baseUrl: "http://localhost:3001/api",
     credentials: "include"
    }),
+  tagTypes: ["Project"],
   endpoints: (builder) => ({
     mailSend: builder.mutation({
       query: (credentials) => ({
@@ -14,7 +15,24 @@ export const shubhamDevApi = createApi({
         body: credentials,
       }),
     }),
+    getProjects: builder.query({
+      query: () => "/projects",
+      providesTags: ["Project"],
+    }),
+    getProjectBySlug: builder.query({
+      query: (slug) => `/projects/slug/${slug}`,
+      providesTags: (result, error, slug) => [{ type: "Project", id: slug }],
+    }),
+    getProjectById: builder.query({
+      query: (id) => `/projects/${id}`,
+      providesTags: (result, error, id) => [{ type: "Project", id }],
+    }),
   }),
 });
 
-export const { useMailSendMutation } = shubhamDevApi;
+export const { 
+  useMailSendMutation,
+  useGetProjectsQuery,
+  useGetProjectBySlugQuery,
+  useGetProjectByIdQuery,
+} = shubhamDevApi;

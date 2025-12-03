@@ -16,6 +16,14 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Careers from "@/pages/Careers";
 import Media1 from "@/pages/Media1";
 import Faq from "@/pages/Faq";
+import ProjectDetail from "@/pages/ProjectDetail";
+
+import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminRegister from "@/pages/admin/AdminRegister";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import BannerManagement from "@/pages/admin/BannerManagement";
+import ProjectManagement from "@/pages/admin/ProjectManagement";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 export default function AppRoutes() {
   return (
@@ -37,8 +45,16 @@ export default function AppRoutes() {
           <Route path="/careers" element={<Careers />} />
           <Route path="/medeia-2" element={<Media1 />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/project/:id" element={<ProjectDetail />} />
+        </Route>
 
-
+        {/* ADMIN ROUTES */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="banners" element={<BannerManagement />} />
+          <Route path="projects" element={<ProjectManagement />} />
         </Route>
       </Routes>
     </BrowserRouter>

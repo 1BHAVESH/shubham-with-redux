@@ -1,0 +1,217 @@
+import Project from "../models/Project.js";
+
+export const getAllProjects = async (req, res) => {
+  try {
+    const projects = await Project.find().sort({ order: 1, createdAt: -1 });
+    res.status(200).json({ success: true, data: projects });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const getProjectBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const project = await Project.findOne({ slug });
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    res.status(200).json({ success: true, data: project });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const getProjectById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    res.status(200).json({ success: true, data: project });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const createProject = async (req, res) => {
+  try {
+    const {
+      name,
+      title,
+      slug,
+      tagline,
+      description,
+      location,
+      address,
+      status,
+      price,
+      area,
+      propertyTypes,
+      contactNumber,
+      amenities,
+      highlights,
+      nearbyLocations,
+      mapEmbedUrl,
+      isActive,
+      isFeatured,
+      order,
+    } = req.body;
+
+    const projectTitle = name || title;
+
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ success: false, message: "Image is required" });
+    }
+
+    const imageUrl = `/uploads/${req.files.image[0].filename}`;
+    const brochureUrl = req.files.brochure ? `/uploads/${req.files.brochure[0].filename}` : null;
+    const priceSheetUrl = req.files.priceSheet ? `/uploads/${req.files.priceSheet[0].filename}` : null;
+    const logoUrl = req.files.logo ? `/uploads/${req.files.logo[0].filename}` : null;
+    const videoUrl = req.files.video ? `/uploads/${req.files.video[0].filename}` : null;
+    const overviewImageUrl = req.files.overviewImage ? `/uploads/${req.files.overviewImage[0].filename}` : null;
+    const masterPlanImageUrl = req.files.masterPlanImage ? `/uploads/${req.files.masterPlanImage[0].filename}` : null;
+    const floorPlanImageUrl = req.files.floorPlanImage ? `/uploads/${req.files.floorPlanImage[0].filename}` : null;
+    const buildingImageUrl = req.files.buildingImage ? `/uploads/${req.files.buildingImage[0].filename}` : null;
+
+    const galleryImages = req.files.galleryImages
+      ? req.files.galleryImages.map((file) => `/uploads/${file.filename}`)
+      : [];
+
+    const project = await Project.create({
+      title: projectTitle,
+      slug,
+      tagline,
+      description,
+      location,
+      address,
+      status,
+      price,
+      area,
+      propertyTypes,
+      contactNumber,
+      imageUrl,
+      logoUrl,
+      videoUrl,
+      overviewImageUrl,
+      masterPlanImageUrl,
+      floorPlanImageUrl,
+      buildingImageUrl,
+      galleryImages,
+      brochureUrl,
+      priceSheetUrl,
+      amenities: amenities ? JSON.parse(amenities) : [],
+      highlights: highlights ? JSON.parse(highlights) : [],
+      nearbyLocations: nearbyLocations ? JSON.parse(nearbyLocations) : [],
+      mapEmbedUrl,
+      isActive: isActive !== undefined ? isActive : true,
+      isFeatured: isFeatured !== undefined ? isFeatured : false,
+      order: order || 0,
+    });
+
+    res.status(201).json({ success: true, data: project });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const updateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      slug,
+      tagline,
+      description,
+      location,
+      address,
+      status,
+      price,
+      area,
+      propertyTypes,
+      contactNumber,
+      amenities,
+      highlights,
+      nearbyLocations,
+      mapEmbedUrl,
+      isActive,
+      isFeatured,
+      order,
+    } = req.body;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    // Update text fields
+    if (title !== undefined) project.title = title;
+    if (slug !== undefined) project.slug = slug;
+    if (tagline !== undefined) project.tagline = tagline;
+    if (description !== undefined) project.description = description;
+    if (location !== undefined) project.location = location;
+    if (address !== undefined) project.address = address;
+    if (status !== undefined) project.status = status;
+    if (price !== undefined) project.price = price;
+    if (area !== undefined) project.area = area;
+    if (propertyTypes !== undefined) project.propertyTypes = propertyTypes;
+    if (contactNumber !== undefined) project.contactNumber = contactNumber;
+    if (mapEmbedUrl !== undefined) project.mapEmbedUrl = mapEmbedUrl;
+    if (isActive !== undefined) project.isActive = isActive;
+    if (isFeatured !== undefined) project.isFeatured = isFeatured;
+    if (order !== undefined) project.order = order;
+
+    // Update JSON fields
+    if (amenities) project.amenities = JSON.parse(amenities);
+    if (highlights) project.highlights = JSON.parse(highlights);
+    if (nearbyLocations) project.nearbyLocations = JSON.parse(nearbyLocations);
+
+    // Update file fields
+    if (req.files?.image) project.imageUrl = `/uploads/${req.files.image[0].filename}`;
+    if (req.files?.brochure) project.brochureUrl = `/uploads/${req.files.brochure[0].filename}`;
+    if (req.files?.priceSheet) project.priceSheetUrl = `/uploads/${req.files.priceSheet[0].filename}`;
+    if (req.files?.logo) project.logoUrl = `/uploads/${req.files.logo[0].filename}`;
+    if (req.files?.video) project.videoUrl = `/uploads/${req.files.video[0].filename}`;
+    if (req.files?.overviewImage) project.overviewImageUrl = `/uploads/${req.files.overviewImage[0].filename}`;
+    if (req.files?.masterPlanImage) project.masterPlanImageUrl = `/uploads/${req.files.masterPlanImage[0].filename}`;
+    if (req.files?.floorPlanImage) project.floorPlanImageUrl = `/uploads/${req.files.floorPlanImage[0].filename}`;
+    if (req.files?.buildingImage) project.buildingImageUrl = `/uploads/${req.files.buildingImage[0].filename}`;
+    if (req.files?.galleryImages) {
+      project.galleryImages = req.files.galleryImages.map((file) => `/uploads/${file.filename}`);
+    }
+
+    const updatedProject = await project.save();
+    res.status(200).json({ success: true, data: updatedProject });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    await Project.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "Project deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
