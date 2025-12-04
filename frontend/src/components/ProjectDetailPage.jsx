@@ -60,7 +60,13 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
   const [swiperOpen, setSwiperOpen] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
 
-  const tabs = ["Overview", "Amenities", "Layout Plans", "Location", "Image Gallery"];
+  const tabs = [
+    "Overview",
+    "Amenities",
+    "Layout Plans",
+    "Location",
+    "Image Gallery",
+  ];
   const plan = ["Master Plan", "Floor Plan"];
 
   const openSwiper = (index) => {
@@ -134,7 +140,10 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
       </section>
 
       {/* OVERVIEW SECTION */}
-      <section id="overview" className="max-w-[1140px] mx-auto px-4 md:px-6 mt-[50px]">
+      <section
+        id="overview"
+        className="max-w-[1140px] mx-auto px-4 md:px-6 mt-[50px]"
+      >
         <div className="text-center mb-10">
           <h2 className="text-[32px] text-[#D2AB48] font-semibold">Overview</h2>
           <div className="flex items-center justify-center">
@@ -165,29 +174,41 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
                 and plan your site visit to experience the project.
               </p>
             )}
+            
 
             {project.priceSheetUrl && (
-              <div className="mt-6">
-                <button
-                  className="bg-[#D2AB48] cursor-pointer hover:bg-[#b6903d] text-white font-semibold px-6 py-2 rounded-md transition-colors duration-300"
-                  onClick={() => {
-                    const link = document.createElement("a");
-                    link.href = getFileUrl(project.priceSheetUrl);
-                    link.download = "price-sheet.pdf";
-                    link.click();
-                  }}
-                >
-                  Download Price Sheet
-                </button>
-              </div>
+              <>
+                <div className="mt-6">
+                  <button
+                    className="bg-[#D2AB48] cursor-pointer hover:bg-[#b6903d] text-white font-semibold px-6 py-2 rounded-md transition-colors duration-300"
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = getFileUrl(project.priceSheetUrl);
+                      link.download = "price-sheet.pdf";
+                      link.click();
+                    }}
+                  >
+                    Download Price Sheet
+                  </button>
+                </div>
+              </>
             )}
+
+            
 
             {highlights.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 sm:gap-12 mt-12">
                 {highlights.map((highlight, index) => (
-                  <div key={index} className="flex flex-col items-start leading-tight">
-                    <p className="font-semibold text-[14px]">{highlight.title}</p>
-                    <p className="text-[13px] text-gray-600">{highlight.subtitle}</p>
+                  <div
+                    key={index}
+                    className="flex flex-col items-start leading-tight"
+                  >
+                    <p className="font-semibold text-[14px]">
+                      {highlight.title}
+                    </p>
+                    <p className="text-[13px] text-gray-600">
+                      {highlight.subtitle}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -208,7 +229,9 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
       {amenities.length > 0 && (
         <section className="mt-10">
           <div className="text-center mb-10 bg-white">
-            <h2 className="text-[32px] text-[#D2AB48] font-semibold">Amenities</h2>
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Amenities
+            </h2>
             <div className="flex items-center justify-center">
               <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
               <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
@@ -229,7 +252,11 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
                       className="flex flex-col items-center text-center gap-4"
                     >
                       <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center">
-                        <Icon size={32} strokeWidth={2} className="text-black" />
+                        <Icon
+                          size={32}
+                          strokeWidth={2}
+                          className="text-black"
+                        />
                       </div>
                       <span className="text-white text-sm font-medium leading-snug">
                         {amenity.name}
@@ -247,7 +274,9 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
       {(project.masterPlanImageUrl || project.floorPlanImageUrl) && (
         <section id="Layout Plans" className="w-full mt-[30px]">
           <div className="text-center mb-10">
-            <h2 className="text-[32px] text-[#D2AB48] font-semibold">Layout Plans</h2>
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Layout Plans
+            </h2>
             <div className="flex items-center justify-center">
               <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
               <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
@@ -264,7 +293,11 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
                     key={index}
                     onClick={() => setActiveTab(item)}
                     className={`font-bold text-[20.06px] cursor-pointer  
-                      ${activeTab === item ? "text-[#D2AB48] underline underline-offset-4" : "text-black"}
+                      ${
+                        activeTab === item
+                          ? "text-[#D2AB48] underline underline-offset-4"
+                          : "text-black"
+                      }
                       hover:text-[#D2AB48]`}
                   >
                     {item}
@@ -303,9 +336,10 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
               Shubham Developers – Crafting Spaces, Creating Trust
             </h3>
             <p className="text-white mt-4 text-[16px] md:text-[18px] leading-relaxed">
-              With a strong vision of quality construction and customer satisfaction,
-              Shubham Developers delivers modern residential & commercial projects
-              that bring comfort, luxury, and a premium lifestyle together.
+              With a strong vision of quality construction and customer
+              satisfaction, Shubham Developers delivers modern residential &
+              commercial projects that bring comfort, luxury, and a premium
+              lifestyle together.
             </p>
             <Dialog>
               <DialogTrigger asChild>
@@ -322,10 +356,14 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
       )}
 
       {/* LOCATION SECTION */}
-      {(project.address || project.mapEmbedUrl || nearbyLocations.length > 0) && (
+      {(project.address ||
+        project.mapEmbedUrl ||
+        nearbyLocations.length > 0) && (
         <section id="Location" className="w-full mt-10">
           <div className="text-center mb-10">
-            <h2 className="text-[32px] text-[#D2AB48] font-semibold">Location</h2>
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Location
+            </h2>
             <div className="flex items-center justify-center">
               <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
               <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
@@ -347,7 +385,9 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
                     />
                   )}
                   {project.address && (
-                    <p className="text-gray-700 leading-6">"{project.address}"</p>
+                    <p className="text-gray-700 leading-6">
+                      "{project.address}"
+                    </p>
                   )}
                   {nearbyLocations.length > 0 && (
                     <>
@@ -392,7 +432,9 @@ export default function ProjectDetailPage({ project, isLoading, error }) {
       {galleryImages.length > 0 && (
         <section id="Image Gallery">
           <div className="text-center mb-10">
-            <h2 className="text-[32px] text-[#D2AB48] font-semibold">Image Gallery</h2>
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Image Gallery
+            </h2>
             <div className="flex items-center justify-center">
               <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
               <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>

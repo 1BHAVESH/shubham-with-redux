@@ -21,6 +21,8 @@ import ProjectForm from "@/components/admin/ProjectForm";
 import { useGetProjectsQuery, useDeleteProjectMutation } from "@/redux/features/adminApi";
 import { toast } from "sonner";
 
+const BASE_URL = "http://localhost:3001";
+
 export default function ProjectManagement() {
   const { data: projectsData, isLoading, error } = useGetProjectsQuery();
   const [deleteProject, { isLoading: isDeleting }] = useDeleteProjectMutation();
@@ -133,8 +135,9 @@ export default function ProjectManagement() {
                     <TableCell>
                       {project.imageUrl ? (
                         <img
-                          src={project.imageUrl}
-                          alt={project.name}
+                          src={`${BASE_URL}${project.imageUrl}`}
+
+                          alt={project.title}
                           className="w-16 h-12 object-cover rounded"
                         />
                       ) : (
@@ -145,9 +148,9 @@ export default function ProjectManagement() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="text-white font-medium">{project.name}</p>
+                        <p className="text-white font-medium">{project.title}</p>
                         <p className="text-zinc-500 text-sm hidden sm:block">
-                          {project.price || "Price TBD"}
+                          {project.price || ""}
                         </p>
                       </div>
                     </TableCell>

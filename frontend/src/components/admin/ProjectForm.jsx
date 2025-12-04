@@ -1,6 +1,6 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { Upload, X, FileText, Plus, Trash2 } from "lucide-react";
+import { Upload, X, FileText, Plus, Trash2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import {
 } from "@/redux/features/adminApi";
 import { toast } from "sonner";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const getImageUrl = (url) => {
   if (!url) return null;
@@ -51,6 +51,11 @@ export default function ProjectForm({ open, onOpenChange, project }) {
   const [brochureName, setBrochureName] = useState(null);
   const [selectedPriceSheet, setSelectedPriceSheet] = useState(null);
   const [priceSheetName, setPriceSheetName] = useState(null);
+
+  // Video states
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videoFileName, setVideoFileName] = useState(null);
 
   const isEditing = !!project;
   const isLoading = isCreating || isUpdating;
@@ -133,6 +138,12 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       setGalleryPreviews((project.galleryImages || []).map(getImageUrl));
       setBrochureName(project.brochureUrl ? "Current Brochure" : null);
       setPriceSheetName(project.priceSheetUrl ? "Current Price Sheet" : null);
+      
+      // Set video preview if exists
+      if (project.videoFileUrl) {
+        setVideoPreview(getImageUrl(project.videoFileUrl));
+        setVideoFileName("Current Video");
+      }
     } else {
       reset({
         title: "",
@@ -169,6 +180,8 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     setGalleryPreviews([]);
     setBrochureName(null);
     setPriceSheetName(null);
+    setVideoPreview(null);
+    setVideoFileName(null);
   };
 
   const resetAllSelectedFiles = () => {
@@ -181,6 +194,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     setSelectedGalleryImages([]);
     setSelectedBrochure(null);
     setSelectedPriceSheet(null);
+    setSelectedVideo(null);
   };
 
   const handleImageChange = (e, setPreview, setSelected) => {
@@ -216,6 +230,41 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       setSelected(file);
       setName(file.name);
     }
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (50MB = 50 * 1024 * 1024 bytes)
+      const maxSize = 50 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error("Video file size must be less than 50MB");
+        e.target.value = null;
+        return;
+      }
+
+      // Check file type
+      const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please upload a valid video file (MP4, WebM, OGG, MOV)");
+        e.target.value = null;
+        return;
+      }
+
+      setSelectedVideo(file);
+      setVideoFileName(file.name);
+      const url = URL.createObjectURL(file);
+      setVideoPreview(url);
+    }
+  };
+
+  const removeVideo = () => {
+    if (videoPreview && videoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    setVideoPreview(null);
+    setSelectedVideo(null);
+    setVideoFileName(null);
   };
 
   const onSubmit = async (data) => {
@@ -262,8 +311,12 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       if (selectedBrochure) formData.append("brochure", selectedBrochure);
       if (selectedPriceSheet) formData.append("priceSheet", selectedPriceSheet);
 
+      // Video
+      if (selectedVideo) formData.append("video", selectedVideo);
+
       if (isEditing) {
-        await updateProject({ id: project._id, formData }).unwrap();
+        console.log(formData)
+         await updateProject({ id: project._id, formData }).unwrap();
         toast.success("Project updated successfully!");
       } else {
         await createProject(formData).unwrap();
@@ -514,14 +567,55 @@ export default function ProjectForm({ open, onOpenChange, project }) {
               />
             </div>
 
+            {/* Video Section */}
             <div className="space-y-2">
-              <Label htmlFor="videoUrl">Video URL</Label>
+              <Label>Video File (Max 50MB)</Label>
+              {videoPreview ? (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <video
+                      src={videoPreview}
+                      controls
+                      className="w-full h-48 rounded-lg bg-black"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                    <button
+                      type="button"
+                      onClick={removeVideo}
+                      className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {videoFileName && (
+                    <p className="text-zinc-400 text-sm">{videoFileName}</p>
+                  )}
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-[#d4af37] transition-colors">
+                  <Video className="w-6 h-6 text-zinc-400 mb-1" />
+                  <span className="text-zinc-400 text-xs">Upload video (MP4, WebM, OGG, MOV)</span>
+                  <span className="text-zinc-500 text-xs mt-1">Max size: 50MB</span>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                    className="hidden"
+                    onChange={handleVideoChange}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="videoUrl">Video URL (YouTube/External)</Label>
               <Input
                 id="videoUrl"
                 placeholder="Enter YouTube or video URL"
                 className="bg-zinc-800 border-zinc-700"
                 {...register("videoUrl")}
               />
+              <p className="text-zinc-500 text-xs">You can upload a video file above OR provide a URL here</p>
             </div>
 
             {/* Gallery Images */}
@@ -690,9 +784,10 @@ export default function ProjectForm({ open, onOpenChange, project }) {
             ))}
           </div>
 
-          {/* Map Section */}
+          {/* Additional Settings */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#d4af37]">Map</h3>
+            <h3 className="text-lg font-semibold text-[#d4af37]">Additional Settings</h3>
+            
             <div className="space-y-2">
               <Label htmlFor="mapEmbedUrl">Map Embed URL</Label>
               <Input
@@ -702,59 +797,65 @@ export default function ProjectForm({ open, onOpenChange, project }) {
                 {...register("mapEmbedUrl")}
               />
             </div>
-          </div>
 
-          {/* Settings Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#d4af37]">Settings</h3>
             <div className="grid grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  className="w-4 h-4 accent-[#d4af37]"
-                  {...register("isActive")}
-                />
-                <Label htmlFor="isActive">Active</Label>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isFeatured"
-                  className="w-4 h-4 accent-[#d4af37]"
-                  {...register("isFeatured")}
-                />
-                <Label htmlFor="isFeatured">Featured</Label>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="order">Display Order</Label>
                 <Input
                   id="order"
                   type="number"
+                  placeholder="0"
                   className="bg-zinc-800 border-zinc-700"
                   {...register("order", { valueAsNumber: true })}
                 />
               </div>
+
+              <div className="flex items-center space-x-2 pt-8">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-800"
+                  {...register("isActive")}
+                />
+                <Label htmlFor="isActive" className="cursor-pointer">Active</Label>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-8">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  className="w-4 h-4 rounded border-zinc-700 bg-zinc-800"
+                  {...register("isFeatured")}
+                />
+                <Label htmlFor="isFeatured" className="cursor-pointer">Featured</Label>
+              </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          {/* Form Actions */}
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button
               type="submit"
+              className="bg-[#d4af37] text-black hover:bg-[#c4a137]"
               disabled={isLoading}
-              className="bg-[#d4af37] hover:bg-[#b8962f] text-black"
             >
-              {isLoading ? "Saving..." : isEditing ? "Update" : "Create"}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  {isEditing ? "Updating..." : "Creating..."}
+                </span>
+              ) : (
+                <span>{isEditing ? "Update Project" : "Create Project"}</span>
+              )}
             </Button>
           </DialogFooter>
         </form>

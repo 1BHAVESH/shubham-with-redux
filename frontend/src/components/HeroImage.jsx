@@ -10,6 +10,8 @@ export default function HeroImage() {
   const { data: bannersData, isLoading } = useGetBannersQuery();
   const banners = bannersData?.data || [];
 
+  console.log(banners)
+
   if (isLoading) {
     return (
       <section className="w-full h-[270px] lg:h-[501px] bg-gray-200 animate-pulse" />

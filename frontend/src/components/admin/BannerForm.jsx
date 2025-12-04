@@ -19,6 +19,8 @@ import {
 import { toast } from "sonner";
 
 export default function BannerForm({ open, onOpenChange, banner }) {
+
+  console.log(banner)
   const [createBanner, { isLoading: isCreating }] = useCreateBannerMutation();
   const [updateBanner, { isLoading: isUpdating }] = useUpdateBannerMutation();
   const [imagePreview, setImagePreview] = useState(null);
@@ -26,6 +28,9 @@ export default function BannerForm({ open, onOpenChange, banner }) {
 
   const isEditing = !!banner;
   const isLoading = isCreating || isUpdating;
+
+const BASE_URL = "http://localhost:3001";
+
 
   const {
     register,
@@ -49,7 +54,12 @@ export default function BannerForm({ open, onOpenChange, banner }) {
         link: banner.link || "",
         order: banner.order || 0,
       });
-      setImagePreview(banner.imageUrl || null);
+      console.log(banner.imgUrl)
+      setImagePreview(banner?.imageUrl ? `${BASE_URL}${banner.imageUrl}` : null);
+
+
+      console.log(imagePreview)
+
     } else {
       reset({
         title: "",
@@ -61,6 +71,9 @@ export default function BannerForm({ open, onOpenChange, banner }) {
     }
     setSelectedFile(null);
   }, [banner, reset]);
+
+  console.log(imagePreview)
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -166,7 +179,7 @@ export default function BannerForm({ open, onOpenChange, banner }) {
             <Label>Banner Image</Label>
             {imagePreview ? (
               <div className="relative">
-                <img
+                <img 
                   src={imagePreview}
                   alt="Preview"
                   className="w-full h-40 object-cover rounded-lg"

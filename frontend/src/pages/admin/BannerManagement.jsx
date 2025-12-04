@@ -21,6 +21,9 @@ import BannerForm from "@/components/admin/BannerForm";
 import { useGetBannersQuery, useDeleteBannerMutation } from "@/redux/features/adminApi";
 import { toast } from "sonner";
 
+const BASE_URL = "http://localhost:3001";
+
+
 export default function BannerManagement() {
   const { data: bannersData, isLoading, error } = useGetBannersQuery();
   const [deleteBanner, { isLoading: isDeleting }] = useDeleteBannerMutation();
@@ -31,6 +34,8 @@ export default function BannerManagement() {
   const [bannerToDelete, setBannerToDelete] = useState(null);
 
   const banners = bannersData?.data || [];
+
+  console.log(bannersData)
 
   const handleEdit = (banner) => {
     setSelectedBanner(banner);
@@ -114,7 +119,7 @@ export default function BannerManagement() {
                     <TableCell>
                       {banner.imageUrl ? (
                         <img
-                          src={banner.imageUrl}
+                          src={`${BASE_URL}${banner.imageUrl}`}
                           alt={banner.title}
                           className="w-16 h-10 object-cover rounded"
                         />

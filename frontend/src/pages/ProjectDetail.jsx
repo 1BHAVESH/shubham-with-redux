@@ -1,37 +1,92 @@
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { useGetProjectsQuery } from "@/redux/features/adminApi";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import EnquiryDialog from "@/components/EnquiryDialog";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import buildingImg from "../assets/image 27.png";
+import arrowImg from "../assets/Frame 48.png";
+import subhamLogo from "../assets/Subham Paradise 2.png";
+import {
+  Waves,
+  Baby,
+  Flower2,
+  Dumbbell,
+  PartyPopper,
+  Coffee,
+  Route,
+  PlayCircle,
+  Tent,
+  Armchair,
+} from "lucide-react";
 
 const BASE_URL = "http://localhost:3001";
 
-export default function ProjectDetail() {
+const ProjectDetail = () => {
   const { id } = useParams();
   const { data: projectsData, isLoading } = useGetProjectsQuery();
   const projects = projectsData?.data || [];
   const project = projects.find((p) => p._id === id);
 
+  const [activeTab, setActiveTab] = useState("Master Plan");
   const [swiperOpen, setSwiperOpen] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
 
-  console.log(project)
+  const tabs = [
+    "Overview",
+    "Amenities",
+    "Layout Plans",
+    "Location",
+    "Image Gallery",
+  ];
 
-  console.log(`${BASE_URL}${project.imageUrl}`)
+  const amenities = [
+    { icon: Waves, name: "Rooftop Swimming Pool" },
+    { icon: Baby, name: "Kids Pool" },
+    { icon: Flower2, name: "Yoga Lawn" },
+    { icon: Dumbbell, name: "Open Gym" },
+    { icon: PartyPopper, name: "Party Lawn" },
+    { icon: Coffee, name: "Open Lounge with Kitchen counter" },
+    { icon: Route, name: "Rooftop Walking Track" },
+    { icon: PlayCircle, name: "Children's Play Area with Sandpit" },
+    { icon: Tent, name: "Cabanas" },
+    { icon: Armchair, name: "Senior Citizen Area" },
+  ];
 
+  const nearbyLocations = [
+    "AIIMS",
+    "National Highway",
+    "Medipluse Hospital",
+    "Indiabulls Mega Mall",
+    "Jodhpur Railway Station",
+    "Jodhpur Airport",
+    "DPS School",
+    "Lucky International School",
+    "The New High Court",
+  ];
+
+  const plan = ["Master Plan", "Floor Plan"];
+
+  // Open image in fullscreen swiper
   const openSwiper = (index) => {
     setStartIndex(index);
     setSwiperOpen(true);
   };
 
+  // ESC key to close
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && setSwiperOpen(false);
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
+
+  const handleScroll = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -44,6 +99,8 @@ export default function ProjectDetail() {
     );
   }
 
+  console.log(project);
+
   if (!project) {
     return (
       <div className="max-w-[1370px] mx-auto px-6 lg:px-12 py-16 text-center">
@@ -52,25 +109,70 @@ export default function ProjectDetail() {
     );
   }
 
+  const galleryImages = (project.galleryImages || []).map(
+    (img) => `${BASE_URL}${img}`
+  );
+
   return (
     <>
-      {/* HERO SECTION WITH PROJECT IMAGE */}
+      {/* VIDEO/IMAGE SECTION */}
       <section className="relative w-full h-[450px] md:h-[520px] overflow-visible">
-        <img
-          src={`${BASE_URL}${project.imageUrl}`}
-          alt={project.title}
-          className="w-full h-full object-cover"
-        />
+        {project.videoUrl ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src={`${BASE_URL}${project.videoUrl}`} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={`${BASE_URL}${project.imageUrl}`}
+            alt={project.title}
+            className="w-full h-full object-cover"
+          />
+        )}
+
+        {/* DARK OVERLAY */}
         <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* HEADING */}
         <div className="absolute inset-0 flex justify-center items-center">
           <h1 className="text-white text-3xl md:text-[40px] font-extrabold">
             {project.title}
           </h1>
         </div>
+
+        {/* YELLOW NAVBAR (OVERLAP) */}
+        <div className="hidden absolute bottom-0 translate-y-1/2 w-full justify-center z-20">
+          <div className="bg-[#D1A84F] max-w-[1140px] w-[90%] h-[72px] text-white flex items-center justify-between px-[67px] rounded-2xl shadow-lg text-sm md:text-base">
+            {tabs.map((tab, index) => (
+              <div key={index} className="flex flex-row gap-6">
+                <button
+                  onClick={() => handleScroll(tab)}
+                  className="hover:opacity-80 cursor-pointer text-[20px] font-medium transition-all duration-300"
+                >
+                  {tab}
+                </button>
+                <div
+                  className={`h-8 w-[1px] bg-white ${
+                    index < 4 ? "block" : "hidden"
+                  }`}
+                ></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* OVERVIEW SECTION */}
-      <section className="max-w-[1140px] mx-auto px-4 md:px-6 mt-[50px]">
+      <section
+        id="Overview"
+        className="max-w-[1140px] mx-auto px-4 md:px-6 mt-[50px]"
+      >
+        {/* TITLE */}
         <div className="text-center mb-10">
           <h2 className="text-[32px] text-[#D2AB48] font-semibold">Overview</h2>
           <div className="flex items-center justify-center">
@@ -78,12 +180,16 @@ export default function ProjectDetail() {
             <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
             <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
           </div>
-          {project.location && (
-            <p className="text-[20px] mt-[10px] font-medium">{project.location}</p>
+          {project.tagline && (
+            <p className="text-[20px] mt-[10px] font-medium">
+              {project.tagline}
+            </p>
           )}
         </div>
 
+        {/* TEXT + IMAGE GRID */}
         <div className="max-w-[1370px] grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* LEFT TEXT */}
           <div>
             {project.description && (
               <p className="text-[16px] font-normal leading-6 text-justify">
@@ -99,47 +205,28 @@ export default function ProjectDetail() {
               >
                 911911 9249
               </a>
-              and plan your site visit to experience the project.
+              and plan your site visit to experience the project.......
             </p>
 
-            {project.brochureUrl && (
-              <div className="mt-6">
-                <button
-                  className="bg-[#D2AB48] cursor-pointer hover:bg-[#b6903d] text-white font-semibold px-6 py-2 rounded-md transition-colors duration-300"
-                  onClick={() => {
-                    const link = document.createElement("a");
-                    link.href = `${BASE_URL}${project.brochureUrl}`;
-                    link.download = project.title;
-                    link.click();
-                  }}
+            {/* HIGHLIGHTS */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 sm:gap-12 md:gap-20 mt-12">
+              {project.highlights?.map((item, index) => (
+                <div
+                  key={item._id || index}
+                  className="flex flex-col items-start leading-tight"
                 >
-                  Download Brochure
-                </button>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 sm:gap-12 mt-12">
-              {project.status && (
-                <div className="flex flex-col items-start leading-tight">
-                  <p className="font-semibold text-[14px] capitalize">{project.status}</p>
-                  <p className="text-[13px] text-gray-600">Status</p>
+                  <p className="font-semibold text-[14px] capitalize">
+                    {item.title}
+                  </p>
+                  <p className="text-[13px] text-gray-600 capitalize">
+                    {item.subtitle}
+                  </p>
                 </div>
-              )}
-              {project.price && (
-                <div className="flex flex-col items-start leading-tight">
-                  <p className="font-semibold text-[14px]">{project.price}</p>
-                  <p className="text-[13px] text-gray-600">Price</p>
-                </div>
-              )}
-              {project.area && (
-                <div className="flex flex-col items-start leading-tight">
-                  <p className="font-semibold text-[14px]">{project.area}</p>
-                  <p className="text-[13px] text-gray-600">Area</p>
-                </div>
-              )}
+              ))}
             </div>
           </div>
 
+          {/* RIGHT IMAGE */}
           <img
             src={`${BASE_URL}${project.imageUrl}`}
             alt={project.title}
@@ -148,8 +235,105 @@ export default function ProjectDetail() {
         </div>
       </section>
 
+      {/* AMENITIES SECTION */}
+      {project.amenities && project.amenities.length > 0 && (
+        <section id="Amenities" className="mt-10">
+          <div className="text-center mb-10 bg-white">
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Amenities
+            </h2>
+            <div className="flex items-center justify-center">
+              <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+              <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
+              <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+            </div>
+            <p className="text-[20px] mt-[10px] font-medium">
+              The beauty lies in little detail
+            </p>
+          </div>
+          <div className="bg-black p-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+                {amenities.map((amenity, index) => {
+                  const Icon = amenity.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center text-center gap-4"
+                    >
+                      <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center">
+                        <Icon
+                          size={32}
+                          strokeWidth={2}
+                          className="text-black"
+                        />
+                      </div>
+                      <span className="text-white text-sm font-medium leading-snug">
+                        {amenity.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* LAYOUT PLANS SECTION */}
+      <section id="Layout Plans" className="w-full mt-[30px]">
+        <div className="text-center mb-10">
+          <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+            Layout Plans
+          </h2>
+          <div className="flex items-center justify-center">
+            <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+            <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
+            <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+          </div>
+          <div className="flex items-center justify-center mt-1 gap-6">
+            {plan.map((item, index) => (
+              <p
+                key={index}
+                onClick={() => setActiveTab(item)}
+                className={`font-bold text-[20.06px] cursor-pointer ${
+                  activeTab === item
+                    ? "text-[#D2AB48] underline underline-offset-4"
+                    : "text-black"
+                } hover:text-[#D2AB48]`}
+              >
+                {item}
+              </p>
+            ))}
+          </div>
+        </div>
+        {/* MAIN IMAGE SECTION */}
+        <div className="w-full py-12 bg-[#FFF9EA]">
+          <div className="max-w-[1140px] mx-auto px-4">
+            {(activeTab === "Master Plan" && project.masterPlanImageUrl) ||
+            (activeTab === "Floor Plan" && project.floorPlanImageUrl) ? (
+              <img
+                src={
+                  activeTab === "Master Plan"
+                    ? `${BASE_URL}${project.masterPlanImageUrl}`
+                    : `${BASE_URL}${project.floorPlanImageUrl}`
+                }
+                alt="Layout Plan"
+                className="w-full rounded-xl shadow-lg object-cover"
+              />
+            ) : (
+              <div className="w-full h-[400px] bg-gray-100 rounded-xl shadow-lg flex items-center justify-center">
+                <p className="text-gray-500 text-lg">
+                  {activeTab} not available
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* CTA SECTION */}
-      <section className="relative w-full h-[350px] md:h-[420px] flex items-center justify-center overflow-hidden mt-16">
+      <section className="relative w-full h-[350px] md:h-[420px] flex items-center justify-center overflow-hidden">
         <img
           src={buildingImg}
           alt="Shubham Developers"
@@ -180,7 +364,7 @@ export default function ProjectDetail() {
       </section>
 
       {/* LOCATION SECTION */}
-      <section className="w-full mt-10">
+      <section id="Location" className="w-full mt-10">
         <div className="text-center mb-10">
           <h2 className="text-[32px] text-[#D2AB48] font-semibold">Location</h2>
           <div className="flex items-center justify-center">
@@ -188,25 +372,145 @@ export default function ProjectDetail() {
             <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
             <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
           </div>
-          {project.location && (
-            <p className="text-[20px] mt-[10px] font-medium">{project.location}</p>
-          )}
+          <p className="text-[20px] mt-[10px] font-medium">
+            LOCATION BENEFITS & TOP REASONS TO INVEST
+          </p>
         </div>
-        <div className="max-w-[1140px] mx-auto px-4">
-          <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow-md">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2303.7374330207706!2d72.9814874!3d26.270844!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1700000000000"
-              width="100%"
-              height="100%"
-              loading="lazy"
-              allowFullScreen=""
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
+        <section className="w-full bg-white py-16">
+          <div className="max-w-[1140px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            {/* LEFT BOX */}
+            <div className="bg-[#FFF7E6] rounded-2xl p-8 shadow-md">
+              <div className="max-w-[400px] mx-10">
+                <img
+                  src={subhamLogo}
+                  alt="Subham Developers"
+                  className="w-[132px] h-[56px] mb-4"
+                />
+
+                {project.location && (
+                  <p className="text-gray-700 leading-6">{project.location}</p>
+                )}
+
+                <h3 className="text-lg font-semibold mt-6 mb-3">
+                  Near By Locations
+                </h3>
+
+                {/* NEARBY LIST */}
+                <ul className="space-y-2">
+                  {nearbyLocations.map((place, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center text-gray-700"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img src={arrowImg} alt="arrow" /> {place}
+                      </div>
+                      <p>3.5 KM</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE GOOGLE MAP */}
+            <div className="w-auto h-[200px] sm:w-[554px] sm:h-[536px] rounded-2xl overflow-hidden shadow-md">
+              <iframe
+                src={
+                  project.mapUrl ||
+                  "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d2303.7374330207706!2d72.9814874!3d26.270844!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1700000000000"
+                }
+                width="100%"
+                height="100%"
+                loading="lazy"
+                allowFullScreen=""
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </div>
-        </div>
+        </section>
       </section>
 
-      <div className="h-16"></div>
+      {/* IMAGE GALLERY SECTION */}
+      {galleryImages.length > 0 && (
+        <section id="Image Gallery">
+          <div className="text-center mb-10">
+            <h2 className="text-[32px] text-[#D2AB48] font-semibold">
+              Image Gallery
+            </h2>
+            <div className="flex items-center justify-center">
+              <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+              <div className="w-[208px] h-[3px] bg-[#D2AB48]"></div>
+              <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
+            </div>
+            <p className="text-[20px] mt-[10px] font-medium">
+              The address of royal living
+            </p>
+          </div>
+          <section className="max-w-[1140px] mx-auto px-4 md:px-6 my-16">
+            {/* gallery grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {galleryImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  onClick={() => openSwiper(index)}
+                  className="rounded-xl shadow-md w-full h-[220px] object-cover cursor-pointer hover:scale-105 transition duration-300"
+                  alt={`Gallery ${index + 1}`}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* FULLSCREEN SWIPER (LIGHTBOX MODE) */}
+          {swiperOpen && (
+            <div
+              className="fixed inset-0 bg-black/90 z-50 flex justify-center items-center p-0"
+              onClick={() => setSwiperOpen(false)}
+            >
+              <div
+                className="relative bg-black rounded-xl shadow-xl w-[50vw] h-[50vh] flex items-center justify-center p-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* CLOSE BUTTON */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSwiperOpen(false);
+                  }}
+                  className="cursor-pointer hover:border-2 hover:border-yellow-300 absolute top-4 right-4 bg-black text-white px-4 py-2 rounded-full z-[100] text-lg"
+                >
+                  ✕
+                </button>
+
+                {/* SWIPER */}
+                <div className="w-full h-full pointer-events-auto [&_.swiper-button-next]:hidden [&_.swiper-button-prev]:hidden md:[&_.swiper-button-next]:block md:[&_.swiper-button-prev]:block [&_.swiper-button-next]:text-white [&_.swiper-button-prev]:text-white">
+                  <Swiper
+                    initialSlide={startIndex}
+                    modules={[Navigation, Pagination]}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="w-full h-full"
+                  >
+                    {galleryImages.map((img, i) => (
+                      <SwiperSlide key={i}>
+                        <div className="flex justify-center items-center w-full h-full pointer-events-auto p-4 sm:p-12">
+                          <img
+                            src={img}
+                            className="max-w-full max-h-full object-contain"
+                            alt={`Gallery image ${i + 1}`}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </>
   );
-}
+};
+
+export default ProjectDetail;
