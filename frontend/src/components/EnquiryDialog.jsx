@@ -21,12 +21,18 @@ import {
 
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useMailSendMutation } from "@/redux/features/shubamdevApi";
+import { useGetProjectTitleQuery, useMailSendMutation } from "@/redux/features/shubamdevApi";
 
 export default function EnquiryDialog({ selectedProject }) {
 
   // console.log(selectedProject)
   const [mailSend, { isLoading }] = useMailSendMutation();
+
+  const {data, isLoading : projectTitleLoading} = useGetProjectTitleQuery()
+
+  if(projectTitleLoading) return <h1>please title</h1>
+
+  console.log(data)
 
   // ⭐ Controlled Select State
   const [projectValue, setProjectValue] = useState(selectedProject || "");

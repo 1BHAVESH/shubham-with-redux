@@ -54,6 +54,10 @@ const ProjectDetail = () => {
     { icon: Armchair, name: "Senior Citizen Area" },
   ];
 
+  console.log(project)
+
+  
+
   const nearbyLocations = [
     "AIIMS",
     "National Highway",
@@ -100,6 +104,13 @@ const ProjectDetail = () => {
   }
 
   console.log(project);
+
+  const amenitiess = project.amenities.length > 0 ? project.amenities.map(item => ({
+    icon: item.icon,
+    name: item.name,
+  })) : [];
+
+  console.log(amenitiess)
 
   if (!project) {
     return (
@@ -248,21 +259,27 @@ const ProjectDetail = () => {
               <div className="w-3 h-[10px] bg-[#D2AB48] rotate-45"></div>
             </div>
             <p className="text-[20px] mt-[10px] font-medium">
-              The beauty lies in little detail
+              The beauty lies in little detailll
             </p>
           </div>
           <div className="bg-black p-8">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-                {amenities.map((amenity, index) => {
-                  const Icon = amenity.icon;
+                {amenitiess.map((amenity, index) => {
+                  // console.log(amenity)
+                  const img = amenity.icon;
+
+                  console.log(img)
+
+               
                   return (
                     <div
                       key={index}
                       className="flex flex-col items-center text-center gap-4"
                     >
                       <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center">
-                        <Icon
+                        <img
+                        src={`${BASE_URL}${img}`}
                           size={32}
                           strokeWidth={2}
                           className="text-black"

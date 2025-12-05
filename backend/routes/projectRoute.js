@@ -8,6 +8,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  getProjectTtile,
 } from "../controller/projectController.js";
 import { protect } from "../middleware/auth.js";
 
@@ -24,7 +25,16 @@ const storage = multer.diskStorage({
   },
 });
 
-const imageFields = ["image", "logo", "overviewImage", "masterPlanImage", "floorPlanImage", "buildingImage", "galleryImages"];
+const imageFields = [
+  "image", 
+  "logo", 
+  "overviewImage", 
+  "masterPlanImage", 
+  "floorPlanImage", 
+  "buildingImage", 
+  "galleryImages",
+  "amenityIcons"  // Added amenity icons
+];
 const videoFields = ["video"];
 const pdfFields = ["brochure", "priceSheet"];
 
@@ -32,7 +42,7 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     if (imageFields.includes(file.fieldname)) {
-      const allowedTypes = /jpeg|jpg|png|gif|webp/;
+      const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
       const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
       const mimetype = allowedTypes.test(file.mimetype);
       if (extname && mimetype) {
@@ -68,6 +78,7 @@ const uploadFields = upload.fields([
   { name: "floorPlanImage", maxCount: 1 },
   { name: "buildingImage", maxCount: 1 },
   { name: "galleryImages", maxCount: 20 },
+  { name: "amenityIcons", maxCount: 50 },  // Added amenity icons field
   { name: "brochure", maxCount: 1 },
   { name: "priceSheet", maxCount: 1 },
 ]);
@@ -78,5 +89,6 @@ router.get("/:id", getProjectById);
 router.post("/", protect, uploadFields, createProject);
 router.put("/:id", protect, uploadFields, updateProject);
 router.delete("/:id", protect, deleteProject);
+router.get("/get-title", getProjectTtile)
 
 export default router;

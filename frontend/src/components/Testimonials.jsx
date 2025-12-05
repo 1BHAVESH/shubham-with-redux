@@ -1,11 +1,12 @@
+import bgImg from "../assets/ChatGPt_Bg_IMG.png";
+import { useState } from "react";
+import { useGetHomePageQuery } from "@/redux/features/homePageApi";
+
 import client1 from "../assets/Screenshot.png";
 import client2 from "../assets/Screenshot.png";
 import client3 from "../assets/Screenshot.png";
 import client4 from "../assets/Screenshot.png";
 import client5 from "../assets/Screenshot.png";
-
-import bgImg from "../assets/ChatGPt_Bg_IMG.png"
-import { useState } from "react";
 
 const people = [
   {
@@ -41,22 +42,39 @@ const people = [
   },
 ];
 
-
-
-
 export default function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0); // 👉 Default first user
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const { data, isLoading } = useGetHomePageQuery();
+
+  if (isLoading) return <h1 className="text-white">wait...</h1>;
+
+  // 🔥 SAFE Dynamic Data
+  const apiTestimonials = data?.testimonials || [];
+
+  // 🔥 FINAL DATA TO USE (dynamic if available, else static fallback)
+  const finalTestimonials =
+    apiTestimonials.length > 0
+      ? apiTestimonials.map((t) => ({
+          img: t.photo,
+          name: t.name,
+          role: t.position,
+          quote: t.message,
+        }))
+      : people; // static fallback
+
+      console.log(finalTestimonials)
 
   return (
-    <section className="relative py-8 md:py-12 text-white bg-black overflow-hidden"
+    <section
+      className="relative py-8 md:py-12 text-white bg-black overflow-hidden"
       style={{
         backgroundImage: `url(${bgImg})`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
-        
-      }}>
-      {/* BG Effect */}
+      }}
+    >
       <div className="absolute inset-0 opacity-30">
         <div
           className="absolute inset-0"
@@ -68,24 +86,22 @@ export default function Testimonials() {
       </div>
 
       <div className="max-w-4xl mx-auto text-center px-6 relative z-10">
+
         {/* Title */}
         <div className="mb-4">
           <div className="flex items-center justify-center gap-3 mb-4">
-  
-  {/* LEFT LINE */}
-  <div className="w-7 h-[4px]  bg-[#d4af37]"></div>
+            <div className="w-7 h-[4px] bg-[#d4af37]"></div>
 
-  {/* TEXT */}
-  <p className="text-white font-semibold uppercase tracking-wider text-sm">
-    Testimonials
-  </p>
+            <p className="text-white font-semibold uppercase tracking-wider text-sm">
+              Testimonials
+            </p>
 
-  {/* RIGHT LINE */}
-  <div className="w-7 h-[4px]  bg-[#d4af37]"></div>
+            <div className="w-7 h-[4px] bg-[#d4af37]"></div>
+          </div>
 
-</div>
-
-          <h2 className="font-playfair text-[30px] md:text-[26px] font-light tracking-wide text-white ">What Our Clients Say</h2>
+          <h2 className="font-playfair text-[30px] md:text-[26px] font-light tracking-wide text-white">
+            What Our Clients Say
+          </h2>
         </div>
 
         {/* Quote Icon */}
@@ -93,23 +109,23 @@ export default function Testimonials() {
           ❝
         </div>
 
-        {/* Dynamic Quote */}
+        {/* Quote */}
         <p className="text-lg md:text-xl font-normal leading-relaxed mb-6 max-w-3xl mx-auto">
-          {people[activeIndex].quote}
+          {finalTestimonials[activeIndex].quote}
         </p>
 
         {/* Name & Role */}
         <div className="mb-6">
-          <h3 className="text-xl font-bold">{people[activeIndex].name}</h3>
-          <p className="text-sm text-gray-400">{people[activeIndex].role}</p>
+          <h3 className="text-xl font-bold">{finalTestimonials[activeIndex].name}</h3>
+          <p className="text-sm text-gray-400">{finalTestimonials[activeIndex].role}</p>
         </div>
 
-        {/* People Images */}
+        {/* Thumbnails */}
         <div className="flex justify-center gap-4 flex-wrap">
-          {people.map((person, index) => (
+          {finalTestimonials.map((person, index) => (
             <div
               key={index}
-              onClick={() => setActiveIndex(index)} // 🔥 CLICK EVENT
+              onClick={() => setActiveIndex(index)}
               className={`w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden cursor-pointer transition-all duration-300 ${
                 activeIndex === index
                   ? "ring-2 ring-white scale-110"
@@ -124,6 +140,7 @@ export default function Testimonials() {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

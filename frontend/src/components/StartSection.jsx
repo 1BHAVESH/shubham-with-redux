@@ -1,8 +1,19 @@
 // components/StatsSection.jsx
 
+import { useGetHomePageQuery } from "@/redux/features/homePageApi";
 import { Award, Building, Trophy, UsersRound, UserStar } from "lucide-react";
 
 export default function StatsSection() {
+
+   const { data, isLoading } = useGetHomePageQuery();
+  
+    if (isLoading) return <h1 className="text-white">wait...</h1>;
+
+    const states = data.stats ? data?.stats : ""
+
+    console.log(states)
+  
+
   return (
     <section
       className="relative py-16 bg-black lg:h-[170px]"
@@ -20,7 +31,7 @@ export default function StatsSection() {
            <Trophy />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#d4af37] leading-none">4</h2>
+            <h2 className="text-xl font-bold text-[#d4af37] leading-none">{states.awards}</h2>
             <p className="text-sm text-yellow-400 mt-1">Award Winning</p>
           </div>
         </div>
@@ -31,7 +42,7 @@ export default function StatsSection() {
            <Building />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#d4af37] leading-none">3</h2>
+            <h2 className="text-xl font-bold text-[#d4af37] leading-none">{states.projects}</h2>
             <p className="text-sm text-yellow-400 mt-1 font-light">Projects Ready</p>
           </div>
         </div>
@@ -42,7 +53,7 @@ export default function StatsSection() {
            <UserStar />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#d4af37] leading-none">23 </h2>
+            <h2 className="text-xl font-bold text-[#d4af37] leading-none">{states.clients}</h2>
             <p className="text-sm text-yellow-400 mt-1">Happy Client</p>
           </div>
         </div>
@@ -53,7 +64,7 @@ export default function StatsSection() {
             <UsersRound />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#d4af37] leading-none">20</h2>
+            <h2 className="text-xl font-bold text-[#d4af37] leading-none">{states.team}</h2>
             <p className="text-sm text-yellow-400 mt-1 ">Team Members</p>
           </div>
         </div>

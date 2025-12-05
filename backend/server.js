@@ -9,6 +9,7 @@ import mailRoute from "./routes/mailRoute.js";
 import adminRoute from "./routes/adminRoute.js";
 import bannerRoute from "./routes/bannerRoute.js";
 import projectRoute from "./routes/projectRoute.js";
+import HomeRoute from "./routes/homeRoute.js"
 import Admin from "./models/Admin.js";
 
 dotenv.config();
@@ -27,7 +28,9 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -35,6 +38,7 @@ app.use("/api/mail", mailRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/banners", bannerRoute);
 app.use("/api/projects", projectRoute);
+app.use("/api/home", HomeRoute)
 
 app.post("/api/seed-admin", async (req, res) => {
   try {

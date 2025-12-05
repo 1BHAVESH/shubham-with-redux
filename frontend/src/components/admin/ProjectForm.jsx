@@ -22,7 +22,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const getImageUrl = (url) => {
   if (!url) return null;
-  if (url.startsWith("data:") || url.startsWith("http") || url.startsWith("blob:")) return url;
+  if (
+    url.startsWith("data:") ||
+    url.startsWith("http") ||
+    url.startsWith("blob:")
+  )
+    return url;
   return `${API_URL}${url}`;
 };
 
@@ -46,6 +51,10 @@ export default function ProjectForm({ open, onOpenChange, project }) {
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [selectedGalleryImages, setSelectedGalleryImages] = useState([]);
 
+  // Amenity icon states - array to store icon for each amenity
+  const [amenityIconPreviews, setAmenityIconPreviews] = useState([]);
+  const [selectedAmenityIcons, setSelectedAmenityIcons] = useState([]);
+
   // Document states
   const [selectedBrochure, setSelectedBrochure] = useState(null);
   const [brochureName, setBrochureName] = useState(null);
@@ -66,6 +75,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     reset,
     control,
     formState: { errors },
+    watch,
   } = useForm({
     defaultValues: {
       title: "",
@@ -136,10 +146,19 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       setFloorPlanPreview(getImageUrl(project.floorPlanImageUrl));
       setBuildingImagePreview(getImageUrl(project.buildingImageUrl));
       setGalleryPreviews((project.galleryImages || []).map(getImageUrl));
+
+      // Set amenity icon previews from existing data
+      if (project.amenities && project.amenities.length > 0) {
+        const iconPreviews = project.amenities.map((amenity) =>
+          amenity.icon ? getImageUrl(amenity.icon) : null
+        );
+        setAmenityIconPreviews(iconPreviews);
+        setSelectedAmenityIcons(new Array(project.amenities.length).fill(null));
+      }
+
       setBrochureName(project.brochureUrl ? "Current Brochure" : null);
       setPriceSheetName(project.priceSheetUrl ? "Current Price Sheet" : null);
-      
-      // Set video preview if exists
+
       if (project.videoFileUrl) {
         setVideoPreview(getImageUrl(project.videoFileUrl));
         setVideoFileName("Current Video");
@@ -178,6 +197,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     setFloorPlanPreview(null);
     setBuildingImagePreview(null);
     setGalleryPreviews([]);
+    setAmenityIconPreviews([]);
     setBrochureName(null);
     setPriceSheetName(null);
     setVideoPreview(null);
@@ -192,6 +212,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     setSelectedFloorPlan(null);
     setSelectedBuildingImage(null);
     setSelectedGalleryImages([]);
+    setSelectedAmenityIcons([]);
     setSelectedBrochure(null);
     setSelectedPriceSheet(null);
     setSelectedVideo(null);
@@ -205,6 +226,46 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleAmenityIconChange = (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please upload an image file");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAmenityIconPreviews((prev) => {
+          const newPreviews = [...prev];
+          newPreviews[index] = reader.result;
+          return newPreviews;
+        });
+      };
+      reader.readAsDataURL(file);
+
+      setSelectedAmenityIcons((prev) => {
+        const newIcons = [...prev];
+        newIcons[index] = file;
+        return newIcons;
+      });
+    }
+  };
+
+  const removeAmenityIcon = (index) => {
+    setAmenityIconPreviews((prev) => {
+      const newPreviews = [...prev];
+      newPreviews[index] = null;
+      return newPreviews;
+    });
+    setSelectedAmenityIcons((prev) => {
+      const newIcons = [...prev];
+      newIcons[index] = null;
+      return newIcons;
+    });
   };
 
   const handleGalleryChange = (e) => {
@@ -235,7 +296,6 @@ export default function ProjectForm({ open, onOpenChange, project }) {
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check file size (50MB = 50 * 1024 * 1024 bytes)
       const maxSize = 50 * 1024 * 1024;
       if (file.size > maxSize) {
         toast.error("Video file size must be less than 50MB");
@@ -243,8 +303,12 @@ export default function ProjectForm({ open, onOpenChange, project }) {
         return;
       }
 
-      // Check file type
-      const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+      const validTypes = [
+        "video/mp4",
+        "video/webm",
+        "video/ogg",
+        "video/quicktime",
+      ];
       if (!validTypes.includes(file.type)) {
         toast.error("Please upload a valid video file (MP4, WebM, OGG, MOV)");
         e.target.value = null;
@@ -259,12 +323,24 @@ export default function ProjectForm({ open, onOpenChange, project }) {
   };
 
   const removeVideo = () => {
-    if (videoPreview && videoPreview.startsWith('blob:')) {
+    if (videoPreview && videoPreview.startsWith("blob:")) {
       URL.revokeObjectURL(videoPreview);
     }
     setVideoPreview(null);
     setSelectedVideo(null);
     setVideoFileName(null);
+  };
+
+  const handleAddAmenity = () => {
+    appendAmenity({ icon: "", name: "" });
+    setAmenityIconPreviews((prev) => [...prev, null]);
+    setSelectedAmenityIcons((prev) => [...prev, null]);
+  };
+
+  const handleRemoveAmenity = (index) => {
+    removeAmenity(index);
+    setAmenityIconPreviews((prev) => prev.filter((_, i) => i !== index));
+    setSelectedAmenityIcons((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onSubmit = async (data) => {
@@ -289,23 +365,44 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       formData.append("order", data.order);
 
       // Filter out empty array items before submission
-      const filteredAmenities = data.amenities.filter((a) => a.icon && a.name);
-      const filteredHighlights = data.highlights.filter((h) => h.title && h.subtitle);
-      const filteredNearbyLocations = data.nearbyLocations.filter((n) => n.name);
+      const filteredAmenities = data.amenities.filter((a) => a.name);
+      const filteredHighlights = data.highlights.filter(
+        (h) => h.title && h.subtitle
+      );
+      const filteredNearbyLocations = data.nearbyLocations.filter(
+        (n) => n.name
+      );
 
-      // Arrays as JSON
+      // Arrays as JSON (without icon URLs - they'll be added on backend)
       formData.append("amenities", JSON.stringify(filteredAmenities));
       formData.append("highlights", JSON.stringify(filteredHighlights));
-      formData.append("nearbyLocations", JSON.stringify(filteredNearbyLocations));
+      formData.append(
+        "nearbyLocations",
+        JSON.stringify(filteredNearbyLocations)
+      );
 
       // Images
       if (selectedImage) formData.append("image", selectedImage);
       if (selectedLogo) formData.append("logo", selectedLogo);
-      if (selectedOverviewImage) formData.append("overviewImage", selectedOverviewImage);
-      if (selectedMasterPlan) formData.append("masterPlanImage", selectedMasterPlan);
-      if (selectedFloorPlan) formData.append("floorPlanImage", selectedFloorPlan);
-      if (selectedBuildingImage) formData.append("buildingImage", selectedBuildingImage);
-      selectedGalleryImages.forEach((img) => formData.append("galleryImages", img));
+      if (selectedOverviewImage)
+        formData.append("overviewImage", selectedOverviewImage);
+      if (selectedMasterPlan)
+        formData.append("masterPlanImage", selectedMasterPlan);
+      if (selectedFloorPlan)
+        formData.append("floorPlanImage", selectedFloorPlan);
+      if (selectedBuildingImage)
+        formData.append("buildingImage", selectedBuildingImage);
+      selectedGalleryImages.forEach((img) =>
+        formData.append("galleryImages", img)
+      );
+
+      // Amenity icons - append each icon with its index
+      selectedAmenityIcons.forEach((icon, index) => {
+        if (icon) {
+          formData.append(`amenityIcons`, icon);
+          formData.append(`amenityIconIndexes`, index);
+        }
+      });
 
       // Documents
       if (selectedBrochure) formData.append("brochure", selectedBrochure);
@@ -315,8 +412,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
       if (selectedVideo) formData.append("video", selectedVideo);
 
       if (isEditing) {
-        console.log(formData)
-         await updateProject({ id: project._id, formData }).unwrap();
+        await updateProject({ id: project._id, formData }).unwrap();
         toast.success("Project updated successfully!");
       } else {
         await createProject(formData).unwrap();
@@ -332,15 +428,30 @@ export default function ProjectForm({ open, onOpenChange, project }) {
     }
   };
 
-  const ImageUploadField = ({ label, preview, setPreview, setSelected, required }) => (
+  const ImageUploadField = ({
+    label,
+    preview,
+    setPreview,
+    setSelected,
+    required,
+  }) => (
     <div className="space-y-2">
-      <Label>{label} {required && <span className="text-red-500">*</span>}</Label>
+      <Label>
+        {label} {required && <span className="text-red-500">*</span>}
+      </Label>
       {preview ? (
         <div className="relative">
-          <img src={preview} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
+          <img
+            src={preview}
+            alt="Preview"
+            className="w-full h-32 object-cover rounded-lg"
+          />
           <button
             type="button"
-            onClick={() => { setPreview(null); setSelected(null); }}
+            onClick={() => {
+              setPreview(null);
+              setSelected(null);
+            }}
             className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
           >
             <X className="w-4 h-4" />
@@ -368,11 +479,16 @@ export default function ProjectForm({ open, onOpenChange, project }) {
         <div className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#d4af37]" />
-            <span className="text-zinc-300 text-sm truncate max-w-[150px]">{name}</span>
+            <span className="text-zinc-300 text-sm truncate max-w-[150px]">
+              {name}
+            </span>
           </div>
           <button
             type="button"
-            onClick={() => { setSelected(null); setName(null); }}
+            onClick={() => {
+              setSelected(null);
+              setName(null);
+            }}
             className="p-1 text-red-400 hover:text-red-300"
           >
             <X className="w-4 h-4" />
@@ -405,18 +521,26 @@ export default function ProjectForm({ open, onOpenChange, project }) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#d4af37]">Basic Information</h3>
-            
+            <h3 className="text-lg font-semibold text-[#d4af37]">
+              Basic Information
+            </h3>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Project Title <span className="text-red-500">*</span></Label>
+                <Label htmlFor="title">
+                  Project Title <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="title"
                   placeholder="Enter project title"
                   className="bg-zinc-800 border-zinc-700"
-                  {...register("title", { required: "Project title is required" })}
+                  {...register("title", {
+                    required: "Project title is required",
+                  })}
                 />
-                {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm">{errors.title.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -432,12 +556,46 @@ export default function ProjectForm({ open, onOpenChange, project }) {
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
+
               <Textarea
                 id="description"
                 placeholder="Enter project description"
                 className="bg-zinc-800 border-zinc-700 min-h-[80px]"
-                {...register("description")}
+                {...register("description", {
+                  onChange: (e) => {
+                    const value = e.target.value;
+
+                    // words ka array banao
+                    const words = value.trim().split(/\s+/).filter(Boolean);
+
+                    // agar 100 se zyada hai to trim kar do
+                    if (words.length > 100) {
+                      const limitedText = words.slice(0, 100).join(" ");
+                      e.target.value = limitedText; // ✅ textarea me sirf 100 words hi rahenge
+                    }
+
+                    // react-hook-form ko baaki ka kaam karne do
+                    return e;
+                  },
+                })}
               />
+
+              {/* Live word counter */}
+              <p className="text-xs text-gray-400">
+                {
+                  (watch("description") || "")
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean).length
+                }
+                /100 words
+              </p>
+
+              {errors?.description && (
+                <p className="text-red-500 text-xs">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -523,7 +681,7 @@ export default function ProjectForm({ open, onOpenChange, project }) {
           {/* Images Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-[#d4af37]">Images</h3>
-            
+
             <div className="grid grid-cols-3 gap-4">
               <ImageUploadField
                 label="Main Image"
@@ -595,8 +753,12 @@ export default function ProjectForm({ open, onOpenChange, project }) {
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-[#d4af37] transition-colors">
                   <Video className="w-6 h-6 text-zinc-400 mb-1" />
-                  <span className="text-zinc-400 text-xs">Upload video (MP4, WebM, OGG, MOV)</span>
-                  <span className="text-zinc-500 text-xs mt-1">Max size: 50MB</span>
+                  <span className="text-zinc-400 text-xs">
+                    Upload video (MP4, WebM, OGG, MOV)
+                  </span>
+                  <span className="text-zinc-500 text-xs mt-1">
+                    Max size: 50MB
+                  </span>
                   <input
                     type="file"
                     accept="video/mp4,video/webm,video/ogg,video/quicktime"
@@ -615,7 +777,9 @@ export default function ProjectForm({ open, onOpenChange, project }) {
                 className="bg-zinc-800 border-zinc-700"
                 {...register("videoUrl")}
               />
-              <p className="text-zinc-500 text-xs">You can upload a video file above OR provide a URL here</p>
+              <p className="text-zinc-500 text-xs">
+                You can upload a video file above OR provide a URL here
+              </p>
             </div>
 
             {/* Gallery Images */}
@@ -624,7 +788,11 @@ export default function ProjectForm({ open, onOpenChange, project }) {
               <div className="grid grid-cols-4 gap-2">
                 {galleryPreviews.map((preview, index) => (
                   <div key={index} className="relative">
-                    <img src={preview} alt={`Gallery ${index}`} className="w-full h-20 object-cover rounded-lg" />
+                    <img
+                      src={preview}
+                      alt={`Gallery ${index}`}
+                      className="w-full h-20 object-cover rounded-lg"
+                    />
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(index)}
@@ -670,35 +838,71 @@ export default function ProjectForm({ open, onOpenChange, project }) {
           {/* Amenities Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[#d4af37]">Amenities</h3>
+              <h3 className="text-lg font-semibold text-[#d4af37]">
+                Amenities
+              </h3>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => appendAmenity({ icon: "", name: "" })}
+                onClick={handleAddAmenity}
                 className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 <Plus className="w-4 h-4 mr-1" /> Add Amenity
               </Button>
             </div>
             {amenityFields.map((field, index) => (
-              <div key={field.id} className="flex gap-2 items-center">
-                <Input
-                  placeholder="Icon (e.g., 🏊)"
-                  className="bg-zinc-800 border-zinc-700 w-24"
-                  {...register(`amenities.${index}.icon`)}
-                />
-                <Input
-                  placeholder="Amenity name"
-                  className="bg-zinc-800 border-zinc-700 flex-1"
-                  {...register(`amenities.${index}.name`)}
-                />
+              <div key={field.id} className="flex gap-2 items-start">
+                {/* Icon Upload */}
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-400">
+                    Icon (35x28px)
+                  </Label>
+                  {amenityIconPreviews[index] ? (
+                    <div className="relative w-[60px] h-[48px] border border-zinc-700 rounded bg-zinc-800 flex items-center justify-center">
+                      <img
+                        src={amenityIconPreviews[index]}
+                        alt="Icon"
+                        className="max-w-[35px] max-h-[28px] object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAmenityIcon(index)}
+                        className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full text-white hover:bg-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-[60px] h-[48px] border-2 border-dashed border-zinc-700 rounded cursor-pointer hover:border-[#d4af37] transition-colors">
+                      <Upload className="w-4 h-4 text-zinc-400" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleAmenityIconChange(e, index)}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {/* Amenity Name */}
+                <div className="flex-1">
+                  <Label className="text-xs text-zinc-400">Amenity Name</Label>
+                  <Input
+                    placeholder="Enter amenity name"
+                    className="bg-zinc-800 border-zinc-700 mt-1"
+                    {...register(`amenities.${index}.name`)}
+                  />
+                </div>
+
+                {/* Remove Button */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeAmenity(index)}
-                  className="text-red-400 hover:text-red-300"
+                  onClick={() => handleRemoveAmenity(index)}
+                  className="text-red-400 hover:text-red-300 mt-6"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -709,7 +913,9 @@ export default function ProjectForm({ open, onOpenChange, project }) {
           {/* Highlights Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[#d4af37]">Highlights</h3>
+              <h3 className="text-lg font-semibold text-[#d4af37]">
+                Highlights
+              </h3>
               <Button
                 type="button"
                 variant="outline"
@@ -748,7 +954,9 @@ export default function ProjectForm({ open, onOpenChange, project }) {
           {/* Nearby Locations Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[#d4af37]">Nearby Locations</h3>
+              <h3 className="text-lg font-semibold text-[#d4af37]">
+                Nearby Locations
+              </h3>
               <Button
                 type="button"
                 variant="outline"
@@ -786,8 +994,10 @@ export default function ProjectForm({ open, onOpenChange, project }) {
 
           {/* Additional Settings */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#d4af37]">Additional Settings</h3>
-            
+            <h3 className="text-lg font-semibold text-[#d4af37]">
+              Additional Settings
+            </h3>
+
             <div className="space-y-2">
               <Label htmlFor="mapEmbedUrl">Map Embed URL</Label>
               <Input
@@ -817,7 +1027,9 @@ export default function ProjectForm({ open, onOpenChange, project }) {
                   className="w-4 h-4 rounded border-zinc-700 bg-zinc-800"
                   {...register("isActive")}
                 />
-                <Label htmlFor="isActive" className="cursor-pointer">Active</Label>
+                <Label htmlFor="isActive" className="cursor-pointer">
+                  Active
+                </Label>
               </div>
 
               <div className="flex items-center space-x-2 pt-8">
@@ -827,7 +1039,9 @@ export default function ProjectForm({ open, onOpenChange, project }) {
                   className="w-4 h-4 rounded border-zinc-700 bg-zinc-800"
                   {...register("isFeatured")}
                 />
-                <Label htmlFor="isFeatured" className="cursor-pointer">Featured</Label>
+                <Label htmlFor="isFeatured" className="cursor-pointer">
+                  Featured
+                </Label>
               </div>
             </div>
           </div>

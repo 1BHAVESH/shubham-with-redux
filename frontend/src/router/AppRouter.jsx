@@ -24,6 +24,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BannerManagement from "@/pages/admin/BannerManagement";
 import ProjectManagement from "@/pages/admin/ProjectManagement";
 import AdminLayout from "@/components/admin/AdminLayout";
+import HomePage from "@/components/admin/HomePage";
 
 export default function AppRoutes() {
   return (
@@ -55,6 +56,7 @@ export default function AppRoutes() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="banners" element={<BannerManagement />} />
           <Route path="projects" element={<ProjectManagement />} />
+          <Route path="home-page" element={<HomePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

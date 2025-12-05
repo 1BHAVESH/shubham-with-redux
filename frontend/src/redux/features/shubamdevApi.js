@@ -27,6 +27,9 @@ export const shubhamDevApi = createApi({
       query: (id) => `/projects/${id}`,
       providesTags: (result, error, id) => [{ type: "Project", id }],
     }),
+    getProjectTitle: builder.query({
+      query: () => "/projects/get-title",
+    })
   }),
 });
 
@@ -35,4 +38,5 @@ export const {
   useGetProjectsQuery,
   useGetProjectBySlugQuery,
   useGetProjectByIdQuery,
+  useGetProjectTitleQuery
 } = shubhamDevApi;

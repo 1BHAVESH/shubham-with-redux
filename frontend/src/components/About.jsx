@@ -1,10 +1,20 @@
 // components/About.jsx
 
+import { useGetHomePageQuery } from "@/redux/features/homePageApi";
 import hero from "../assets/Screenshot.png";
 import chairman from "../assets/chairman.png";
+import { da } from "zod/v4/locales";
 
 
 export default function About() {
+  const {data, isLoading} = useGetHomePageQuery()
+
+  if(isLoading) return <h1>wait...</h1>
+
+  const homePageAbout = data?.about
+
+  console.log(homePageAbout)
+
   return (
  <section className="max-w-[1370px] mx-auto px-4 sm:px-6 lg:px-12 py-16">
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -18,30 +28,18 @@ export default function About() {
       </div>
 
       <h2 className="text-[28px] sm:text-[32px] font-semibold text-gray-800 mb-6">
-        Welcome to Subham Developers
+       {homePageAbout.title ? homePageAbout.title : "hi"}
       </h2>
 
       <p className="text-[15px] leading-relaxed font-sans text-justify text-gray-700">
-        At Subham Developers, we are committed to offer the best
-        full-service Real Estate and Infrastructure Development. We aim at
-        fulfilling one's dream into reality with our professional approach,
-        timely delivery and commitment to excellent service. Since its
-        inception, we have focused on creating unmatched luxuryspaces with
-        top-notch quality for our clients that surpasses our customer's
-        aspirations. The house of Subham Developers is a blend of experience
-        and a dedicated team to create spaces that offer natural light, air
-        and aesthetically pleasing designs. Our work doesn't end with
-        building a home, quality check-points are installed at every level
-        to ensure the best results. The company is setting new standards in
-        the real estate industry by creating quality-driven projects through
-        our client's trusts.
+        {homePageAbout.description ? homePageAbout.description : "hi"}
       </p>
     </div>
 
     {/* 🟢 IMAGE SECOND FOR MOBILE, FIRST FOR DESKTOP */}
     <div className="w-full order-2 lg:order-1">
       <img
-        src={hero}
+        src={homePageAbout.image}
         alt="Subham Developers"
         className="rounded-xl shadow-md w-full h-[250px] sm:h-[366px] object-cover"
       />

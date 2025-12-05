@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Image, FolderKanban, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Image, FolderKanban, LogOut, Menu, X, HomeIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +19,11 @@ const navItems = [
     path: "/admin/projects",
     icon: FolderKanban,
   },
+  {
+    name: "Home-Page",
+    path: "/admin/home-page",
+    icon: HomeIcon
+  }
 ];
 
 export default function AdminSidebar() {

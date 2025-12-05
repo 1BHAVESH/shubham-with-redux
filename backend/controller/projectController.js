@@ -64,6 +64,7 @@ export const createProject = async (req, res) => {
       isActive,
       isFeatured,
       order,
+      amenityIconIndexes,
     } = req.body;
 
     const projectTitle = name || title;
@@ -76,7 +77,7 @@ export const createProject = async (req, res) => {
     const brochureUrl = req.files.brochure ? `/uploads/${req.files.brochure[0].filename}` : null;
     const priceSheetUrl = req.files.priceSheet ? `/uploads/${req.files.priceSheet[0].filename}` : null;
     const logoUrl = req.files.logo ? `/uploads/${req.files.logo[0].filename}` : null;
-    const videoUrl = req.files.video ? `/uploads/${req.files.video[0].filename}` : null;
+    const videoFileUrl = req.files.video ? `/uploads/${req.files.video[0].filename}` : null;
     const overviewImageUrl = req.files.overviewImage ? `/uploads/${req.files.overviewImage[0].filename}` : null;
     const masterPlanImageUrl = req.files.masterPlanImage ? `/uploads/${req.files.masterPlanImage[0].filename}` : null;
     const floorPlanImageUrl = req.files.floorPlanImage ? `/uploads/${req.files.floorPlanImage[0].filename}` : null;
@@ -85,6 +86,24 @@ export const createProject = async (req, res) => {
     const galleryImages = req.files.galleryImages
       ? req.files.galleryImages.map((file) => `/uploads/${file.filename}`)
       : [];
+
+    // Process amenities with icon uploads
+    let parsedAmenities = amenities ? JSON.parse(amenities) : [];
+    
+    if (req.files?.amenityIcons && amenityIconIndexes) {
+      const iconFiles = req.files.amenityIcons;
+      const indexes = Array.isArray(amenityIconIndexes) 
+        ? amenityIconIndexes 
+        : [amenityIconIndexes];
+      
+      // Map icon files to their corresponding amenities
+      indexes.forEach((index, i) => {
+        const amenityIndex = parseInt(index);
+        if (iconFiles[i] && parsedAmenities[amenityIndex]) {
+          parsedAmenities[amenityIndex].icon = `/uploads/${iconFiles[i].filename}`;
+        }
+      });
+    }
 
     const project = await Project.create({
       title: projectTitle,
@@ -100,7 +119,7 @@ export const createProject = async (req, res) => {
       contactNumber,
       imageUrl,
       logoUrl,
-      videoUrl,
+      videoFileUrl,
       overviewImageUrl,
       masterPlanImageUrl,
       floorPlanImageUrl,
@@ -108,7 +127,7 @@ export const createProject = async (req, res) => {
       galleryImages,
       brochureUrl,
       priceSheetUrl,
-      amenities: amenities ? JSON.parse(amenities) : [],
+      amenities: parsedAmenities,
       highlights: highlights ? JSON.parse(highlights) : [],
       nearbyLocations: nearbyLocations ? JSON.parse(nearbyLocations) : [],
       mapEmbedUrl,
@@ -146,6 +165,7 @@ export const updateProject = async (req, res) => {
       isActive,
       isFeatured,
       order,
+      amenityIconIndexes,
     } = req.body;
 
     const project = await Project.findById(id);
@@ -171,8 +191,29 @@ export const updateProject = async (req, res) => {
     if (isFeatured !== undefined) project.isFeatured = isFeatured;
     if (order !== undefined) project.order = order;
 
-    // Update JSON fields
-    if (amenities) project.amenities = JSON.parse(amenities);
+    // Update JSON fields with amenity icon handling
+    if (amenities) {
+      const parsedAmenities = JSON.parse(amenities);
+      
+      // Handle amenity icons
+      if (req.files?.amenityIcons && amenityIconIndexes) {
+        const iconFiles = req.files.amenityIcons;
+        const indexes = Array.isArray(amenityIconIndexes) 
+          ? amenityIconIndexes 
+          : [amenityIconIndexes];
+        
+        // Map icon files to their corresponding amenities
+        indexes.forEach((index, i) => {
+          const amenityIndex = parseInt(index);
+          if (iconFiles[i] && parsedAmenities[amenityIndex]) {
+            parsedAmenities[amenityIndex].icon = `/uploads/${iconFiles[i].filename}`;
+          }
+        });
+      }
+      
+      project.amenities = parsedAmenities;
+    }
+    
     if (highlights) project.highlights = JSON.parse(highlights);
     if (nearbyLocations) project.nearbyLocations = JSON.parse(nearbyLocations);
 
@@ -181,7 +222,7 @@ export const updateProject = async (req, res) => {
     if (req.files?.brochure) project.brochureUrl = `/uploads/${req.files.brochure[0].filename}`;
     if (req.files?.priceSheet) project.priceSheetUrl = `/uploads/${req.files.priceSheet[0].filename}`;
     if (req.files?.logo) project.logoUrl = `/uploads/${req.files.logo[0].filename}`;
-    if (req.files?.video) project.videoUrl = `/uploads/${req.files.video[0].filename}`;
+    if (req.files?.video) project.videoFileUrl = `/uploads/${req.files.video[0].filename}`;
     if (req.files?.overviewImage) project.overviewImageUrl = `/uploads/${req.files.overviewImage[0].filename}`;
     if (req.files?.masterPlanImage) project.masterPlanImageUrl = `/uploads/${req.files.masterPlanImage[0].filename}`;
     if (req.files?.floorPlanImage) project.floorPlanImageUrl = `/uploads/${req.files.floorPlanImage[0].filename}`;
@@ -213,5 +254,33 @@ export const deleteProject = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+
+export const getProjectTtile = async (req, res) => {
+  try {
+    // Fetch only title from DB
+    const projectTitle = await Project.find().select("title -_id");
+
+    // If no projects found
+    if (!projectTitle || projectTitle.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No project titles found" });
+    }
+
+    // Success response
+    return res.status(200).json({
+      success: true,
+      message: "Project titles fetched successfully",
+      titles: projectTitle,
+    });
+
+  } catch (error) {
+    console.error("Error fetching project titles:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
   }
 };
